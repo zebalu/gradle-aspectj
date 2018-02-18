@@ -1,12 +1,12 @@
 apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 
-group = 'nl.eveoh'
-version = '2.1'
+group = 'net.uberfoo.gradle'
+version = '2.2'
 
 repositories {
     maven {
-        url "https://maven.eveoh.nl/content/groups/public"
+        url "s3://pixite-maven/releases"
     }
 }
 
@@ -23,12 +23,17 @@ publishing {
     }
     repositories {
         maven {
-            url "https://maven.eveoh.nl/content/repositories/releases"
-            if (project.hasProperty('mavenUser')) {
-                credentials {
-                    username mavenUser
-                    password mavenPass
-                }
+            url "s3://pixite-maven/releases"
+            credentials(AwsCredentials) {
+                accessKey AWS_ACCESS_KEY
+                secretKey AWS_SECRET_KEY
+            }
+        }
+        maven {
+            url "s3://pixite-maven/snapshots"
+            credentials(AwsCredentials) {
+                accessKey AWS_ACCESS_KEY
+                secretKey AWS_SECRET_KEY
             }
         }
     }
