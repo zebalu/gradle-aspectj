@@ -124,6 +124,7 @@ class Ajc extends DefaultTask {
 
     String maxmem
     Map<String, String> additionalAjcArgs
+	List<String> additionalCompilerArgs
 
     Ajc() {
         logging.captureStandardOutput(LogLevel.INFO)
@@ -167,6 +168,12 @@ class Ajc extends DefaultTask {
                     pathelement(location: it.absolutePath)
                 }
             }
+			if (null != additionalCompilerArgs) {
+				for (arg in additionalCompilerArgs) {
+					logger.info("   compilerArg $arg")
+					compilerArg(value: arg)
+				}
+			}
         }
     }
 }
