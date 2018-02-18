@@ -2,11 +2,22 @@ apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 
 group = 'net.uberfoo.gradle'
-version = '2.2'
+version = '2.2-SNAPSHOT'
 
 repositories {
     maven {
-        url "s3://pixite-maven/releases"
+        url "s3://uberfoo-maven/releases"
+		credentials(AwsCredentials) {
+			accessKey AWS_ACCESS_KEY
+			secretKey AWS_SECRET_KEY
+		}
+    }
+    maven {
+        url "s3://uberfoo-maven/snapshots"
+		credentials(AwsCredentials) {
+			accessKey AWS_ACCESS_KEY
+			secretKey AWS_SECRET_KEY
+		}
     }
 }
 
@@ -23,14 +34,7 @@ publishing {
     }
     repositories {
         maven {
-            url "s3://pixite-maven/releases"
-            credentials(AwsCredentials) {
-                accessKey AWS_ACCESS_KEY
-                secretKey AWS_SECRET_KEY
-            }
-        }
-        maven {
-            url "s3://pixite-maven/snapshots"
+            url "s3://uberfoo-maven/${project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases' }"
             credentials(AwsCredentials) {
                 accessKey AWS_ACCESS_KEY
                 secretKey AWS_SECRET_KEY
