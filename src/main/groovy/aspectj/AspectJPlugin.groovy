@@ -57,8 +57,9 @@ class AspectJPlugin implements Plugin<Project> {
                 }
 
                 project.tasks[aspectTaskName].setDependsOn(project.tasks[javaTaskName].dependsOn)
-                project.tasks[aspectTaskName].dependsOn(project.tasks[aspectTaskName].aspectpath)
+				project.tasks[aspectTaskName].dependsOn(project.tasks[aspectTaskName].aspectpath)
                 project.tasks[aspectTaskName].dependsOn(project.tasks[aspectTaskName].ajInpath)
+                project.tasks[aspectTaskName].dependsOn(project.tasks[javaTaskName].classpath)
                 project.tasks[javaTaskName].deleteAllActions()
                 project.tasks[javaTaskName].dependsOn(project.tasks[aspectTaskName])
             }
@@ -137,7 +138,7 @@ class Ajc extends DefaultTask {
         logger.info("Running ajc ...")
         logger.info("classpath: ${sourceSet.compileClasspath.asPath}")
         logger.info("srcDirs $sourceSet.java.srcDirs")
-
+		
         def iajcArgs = [classpath           : sourceSet.compileClasspath.asPath,
                         destDir             : sourceSet.java.outputDir.absolutePath,
                         s                   : sourceSet.java.outputDir.absolutePath,
