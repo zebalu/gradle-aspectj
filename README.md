@@ -15,13 +15,11 @@ Something like this:
 ```groovy
 buildscript {
     repositories {
-        maven {
-            url "https://maven.eveoh.nl/content/repositories/releases"
-        }
+        mavenCentral()
     }
 
     dependencies {
-        classpath "nl.eveoh:gradle-aspectj:2.0"
+        classpath "net.uberfoo.gradle:gradle-aspectj:2.2"
     }
 }
 
@@ -33,11 +31,11 @@ apply plugin: 'aspectj'
 
 // Optionally
 project.ext {
-    aspectjVersion = '1.8.12'
+    aspectjVersion = '1.9.0'
 }
 // Or
 aspectj {
-    version = '1.8.12'
+    version = '1.9.0'
 }
 ```
 
@@ -76,13 +74,20 @@ compileAspect {
      additionalAjcArgs = ['debug' : '', 'X' : 'noInline', 'preserveAllLocals' : '']
 }
 ```
+To specify additional Java compiler arguments, you can use ```additionalCompilerArgs```,
+
+```groovy
+compileAspect {
+    additionalCompilerArgs = ['--add-modules', 'java.xml.bind,java.io']
+}
+```
 
 See https://github.com/eveoh/aspectj-example for an example project, contributed by Jason Zwolak.
 
 Development
 -----------
 
-We do not use this code any longer and this repository has been archived. Feel free to fork to make your own changes.
+This project was forked from an abandoned project.  The project is now maintained by James Bryant.
 
 License
 -------
