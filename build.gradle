@@ -2,7 +2,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 
 group = 'net.uberfoo.gradle'
-version = '2.2'
+version = '2.3-SNAPSHOT'
 
 repositories {
     maven {
