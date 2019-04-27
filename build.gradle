@@ -1,5 +1,6 @@
 apply plugin: 'groovy'
 apply plugin: 'maven-publish'
+apply plugin: 'java-gradle-plugin'
 
 group = 'net.uberfoo.gradle'
 version = '2.3-SNAPSHOT'
@@ -19,11 +20,14 @@ repositories {
 			secretKey AWS_SECRET_KEY
 		}
     }
+	jcenter()
 }
 
 dependencies {
     compile localGroovy()
     compile gradleApi()
+	testCompile gradleTestKit()
+	testCompile 'junit:junit:4.12'
 }
 
 publishing {

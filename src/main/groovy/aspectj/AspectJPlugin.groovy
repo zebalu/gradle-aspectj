@@ -60,7 +60,7 @@ class AspectJPlugin implements Plugin<Project> {
 				project.tasks[aspectTaskName].dependsOn(project.tasks[aspectTaskName].aspectpath)
                 project.tasks[aspectTaskName].dependsOn(project.tasks[aspectTaskName].ajInpath)
                 project.tasks[aspectTaskName].dependsOn(project.tasks[javaTaskName].classpath)
-                project.tasks[javaTaskName].deleteAllActions()
+                project.tasks[javaTaskName].actions=[]
                 project.tasks[javaTaskName].dependsOn(project.tasks[aspectTaskName])
             }
         }

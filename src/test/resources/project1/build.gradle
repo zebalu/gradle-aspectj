@@ -1,0 +1,20 @@
+plugins {
+	id 'aspectj'
+	id 'application'
+}
+
+project.ext {
+    aspectjVersion = '1.9.3'
+}
+
+mainClassName = 'com.example.MyApp'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+	// https://mvnrepository.com/artifact/org.aspectj/aspectjrt
+	compile group: 'org.aspectj', name: 'aspectjrt', version: '1.9.3'
+}
+
