@@ -1,6 +1,16 @@
 apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 apply plugin: 'java-gradle-plugin'
+apply plugin: 'com.jfrog.bintray'
+
+buildscript {
+    dependencies {
+	    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.1'
+	}
+	repositories {
+	    jcenter()
+	}
+}
 
 repositories {
     mavenLocal()
@@ -24,18 +34,71 @@ task sourcesJar(type: Jar) {
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from groovydoc.destinationDir
+	dependsOn groovydoc
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "zebalu"
+            name "Balázs Zaicsek"
+            email "zebalu@gmail.com"
+        }
+    }
+
+    scm {
+        url "https://github.com/zebalu/gradle-aspectj"
+    }
 }
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        mavenPublication(MavenPublication) {
             from components.java
             artifact sourcesJar
-            artifact javadocJar
+			artifact javadocJar
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'A very limited capability library to add aspects to compiled projects with gradle.')
+                root.appendNode('name', 'Gradle AspectJ')
+                root.appendNode('url', 'https://github.com/zebalu/gradle-aspectj')
+                root.children().last() + pomConfig
+            }
         }
-    }
-    repositories {
-        mavenLocal()
     }
 }
 
+bintray {
+	user = getPropertyOrWarn('bintray.user')
+	key = getPropertyOrWarn('bintray.key')
+	publications = ['mavenPublication']
+
+	pkg {
+		repo = 'releases'
+		name = 'gradle-aspectj'
+		userOrg = 'zebalujars'
+		licenses = ['Apache-2.0']
+		vcsUrl = 'https://github.com/zebalu/gradle-aspectj'
+	}
+
+}
+
+String getPropertyOrWarn(String propertyName) {
+    if ( !project.hasProperty(propertyName) ) {
+	    logger.warn("There is no property set with name: ${propertyName}. Publication might fail.")
+		return 'missing'
+	}
+	return project.getProperty(propertyName)
+}
