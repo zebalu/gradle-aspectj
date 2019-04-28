@@ -2,24 +2,11 @@ apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 apply plugin: 'java-gradle-plugin'
 
-group = 'net.uberfoo.gradle'
-version = '2.3-SNAPSHOT'
+group = 'io.github.zebalu'
+version = '2.3.1'
 
 repositories {
-    maven {
-        url "s3://uberfoo-maven/releases"
-		credentials(AwsCredentials) {
-			accessKey AWS_ACCESS_KEY
-			secretKey AWS_SECRET_KEY
-		}
-    }
-    maven {
-        url "s3://uberfoo-maven/snapshots"
-		credentials(AwsCredentials) {
-			accessKey AWS_ACCESS_KEY
-			secretKey AWS_SECRET_KEY
-		}
-    }
+    mavenLocal()
 	jcenter()
 }
 
@@ -30,20 +17,28 @@ dependencies {
 	testCompile 'junit:junit:4.12'
 }
 
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allGroovy
+	from sourceSets.main.allJava
+	from 'src/main/resources'
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from groovydoc.destinationDir
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
+            artifact sourcesJar
+			artifact javadocJar
         }
     }
     repositories {
-        maven {
-            url "s3://uberfoo-maven/${project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases' }"
-            credentials(AwsCredentials) {
-                accessKey AWS_ACCESS_KEY
-                secretKey AWS_SECRET_KEY
-            }
-        }
+        mavenLocal()
     }
 }
 
