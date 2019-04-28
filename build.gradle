@@ -2,26 +2,23 @@ apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 apply plugin: 'java-gradle-plugin'
 
-group = 'io.github.zebalu'
-version = '2.3.1'
-
 repositories {
     mavenLocal()
-	jcenter()
+    jcenter()
 }
 
 dependencies {
     compile localGroovy()
     compile gradleApi()
-	testCompile gradleTestKit()
-	testCompile 'junit:junit:4.12'
+    testCompile gradleTestKit()
+    testCompile 'junit:junit:4.12'
 }
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allGroovy
-	from sourceSets.main.allJava
-	from 'src/main/resources'
+    from sourceSets.main.allJava
+    from 'src/main/resources'
 }
 
 task javadocJar(type: Jar) {
@@ -34,7 +31,7 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             artifact sourcesJar
-			artifact javadocJar
+            artifact javadocJar
         }
     }
     repositories {
