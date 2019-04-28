@@ -7,6 +7,8 @@ import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskAction
 
@@ -43,6 +45,9 @@ class AspectJPlugin implements Plugin<Project> {
 		}
 
 		for (projectSourceSet in project.sourceSets) {
+			println projectSourceSet
+			println projectSourceSet.class
+			println projectSourceSet.name
 			def namingConventions = projectSourceSet.name.equals('main') ? new MainNamingConventions() : new DefaultNamingConventions();
 			for (configuration in [
 				namingConventions.getAspectPathConfigurationName(projectSourceSet),
@@ -58,9 +63,9 @@ class AspectJPlugin implements Plugin<Project> {
 				def javaTaskName = namingConventions.getJavaCompileTaskName(projectSourceSet)
 
 				project.tasks.create(name: aspectTaskName, overwrite: true, description: "Compiles AspectJ Source for ${projectSourceSet.name} source set", type: Ajc) {
-					sourceSet = projectSourceSet
-					inputs.files(sourceSet.allJava)
-					outputs.dir(sourceSet.java.outputDir)
+					sourceSet = projectSourceSet.name
+					inputs.files(projectSourceSet.allJava)
+					outputs.dir(projectSourceSet.java.outputDir)
 					aspectpath = project.configurations.findByName(namingConventions.getAspectPathConfigurationName(projectSourceSet))
 					ajInpath = project.configurations.findByName(namingConventions.getAspectInpathConfigurationName(projectSourceSet))
 				}
@@ -126,18 +131,27 @@ class AspectJPlugin implements Plugin<Project> {
  * The definition of the AspectJTask
  */
 class Ajc extends DefaultTask {
+	
+	@Input
+	String sourceSet
+	
+	private SourceSet sourceSetResolved
 
-	SourceSet sourceSet
-
+	@InputFiles
 	FileCollection aspectpath
+	@InputFiles
 	FileCollection ajInpath
 
 	// ignore or warning
+	@Input
 	String xlint = 'ignore'
 
-	String maxmem
-	Map<String, String> additionalAjcArgs
-	List<String> additionalCompilerArgs
+	@Input
+	String maxmem = ""
+	@Input
+	Map<String, String> additionalAjcArgs = [:]
+	@Input
+	List<String> additionalCompilerArgs = []
 
 	Ajc() {
 		logging.captureStandardOutput(LogLevel.INFO)
@@ -148,12 +162,12 @@ class Ajc extends DefaultTask {
 		logger.info("=" * 30)
 		logger.info("=" * 30)
 		logger.info("Running ajc ...")
-		logger.info("classpath: ${sourceSet.compileClasspath.asPath}")
-		logger.info("srcDirs $sourceSet.java.srcDirs")
+		logger.info("classpath: ${sourceSetResolved.compileClasspath.asPath}")
+		logger.info("srcDirs $sourceSetResolved.java.srcDirs")
 
-		def iajcArgs = [classpath           : sourceSet.compileClasspath.asPath,
-			destDir             : sourceSet.java.outputDir.absolutePath,
-			s                   : sourceSet.java.outputDir.absolutePath,
+		def iajcArgs = [classpath           : sourceSetResolved.compileClasspath.asPath,
+			destDir             : sourceSetResolved.java.outputDir.absolutePath,
+			s                   : sourceSetResolved.java.outputDir.absolutePath,
 			source              : project.convention.plugins.java.sourceCompatibility,
 			target              : project.convention.plugins.java.targetCompatibility,
 			inpath              : ajInpath.asPath,
@@ -163,11 +177,11 @@ class Ajc extends DefaultTask {
 			sourceRootCopyFilter: '**/*.java,**/*.aj',
 			showWeaveInfo       : 'true']
 
-		if (null != maxmem) {
+		if (maxmem) {
 			iajcArgs['maxmem'] = maxmem
 		}
 
-		if (null != additionalAjcArgs) {
+		if (additionalAjcArgs) {
 			for (pair in additionalAjcArgs) {
 				iajcArgs[pair.key] = pair.value
 			}
@@ -176,7 +190,9 @@ class Ajc extends DefaultTask {
 		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: project.configurations.ajtools.asPath)
 		ant.iajc(iajcArgs) {
 			sourceRoots {
-				sourceSet.java.srcDirs.each {
+				SourceSet ss = project.sourceSets.find {it.name == sourceSet}
+				if(!ss) throw new GradleException("Can not compile source set: ${sourceSet} since it is not found.")
+				ss.java.srcDirs.each {
 					logger.info("   sourceRoot $it")
 					pathelement(location: it.absolutePath)
 				}
@@ -189,6 +205,18 @@ class Ajc extends DefaultTask {
 			}
 		}
 	}
+	
+	void setSourceSet(String name) {
+		this.sourceSet=name;
+		this.sourceSetResolved=project.sourceSets.find { it.name == name }
+		if(!sourceSetResolved) {
+			throw new GradleException("Can not find source set with name: ${name}")
+		}
+	}
+	
+	void setSourceSet(SourceSet sourceSet) {
+		setSourceSet(sourceSet.name)
+	}
 }
 
 /**
@@ -196,6 +224,7 @@ class Ajc extends DefaultTask {
  */
 class AspectJExtension {
 
+	@Input
 	String version
 
 	AspectJExtension(Project project) {

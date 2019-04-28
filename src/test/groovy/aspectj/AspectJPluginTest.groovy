@@ -11,7 +11,7 @@ class AspectJPluginTest extends GroovyTestCase {
 	@Test
 	public void testExampleHasGoodDay() {
 		File testProjectFolder = new File(this.class.getResource('/project1/README').toURI()).parentFile
-		BuildResult result = GradleRunner.create().withProjectDir(testProjectFolder).withPluginClasspath().forwardOutput().withArguments('clean', 'build', 'run').build();
+		BuildResult result = GradleRunner.create().withProjectDir(testProjectFolder).withPluginClasspath().forwardOutput().withArguments('clean', 'build', 'run', '--stacktrace').build();
 		assert result.output.contains('Good day!')
 	}
 }
