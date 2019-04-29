@@ -45,9 +45,6 @@ class AspectJPlugin implements Plugin<Project> {
 		}
 
 		for (projectSourceSet in project.sourceSets) {
-			println projectSourceSet
-			println projectSourceSet.class
-			println projectSourceSet.name
 			def namingConventions = projectSourceSet.name.equals('main') ? new MainNamingConventions() : new DefaultNamingConventions();
 			for (configuration in [
 				namingConventions.getAspectPathConfigurationName(projectSourceSet),

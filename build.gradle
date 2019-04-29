@@ -3,6 +3,10 @@ apply plugin: 'maven-publish'
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'com.jfrog.bintray'
 
+if (canSign()) {
+    apply plugin: 'signing'
+}
+
 buildscript {
     dependencies {
 	    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.1'
@@ -24,6 +28,12 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
+if (canSign()) {
+    signing {
+        sign configurations.archives
+    }
+}
+
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allGroovy
@@ -38,6 +48,7 @@ task javadocJar(type: Jar) {
 }
 
 artifacts {
+    archives jar
     archives sourcesJar
     archives javadocJar
 }
@@ -69,6 +80,17 @@ publishing {
             from components.java
             artifact sourcesJar
 			artifact javadocJar
+			/*
+			def pomFile = file("${project.buildDir}/pom/generated-pom.xml")
+			pomFile.text=getPom().
+			if (canSign()) {
+ 			    def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+				artifact(pomAscFile) {
+					classifier = null
+					extension = 'pom.asc'
+				}
+			}
+			*/
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'A very limited capability library to add aspects to compiled projects with gradle.')
@@ -78,7 +100,22 @@ publishing {
             }
         }
     }
+	repositories {
+		maven {
+		    url 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+			credentials {
+                username getPropertyOrWarn('sonatypeUser')
+                password getPropertyOrWarn('sonatypePassword')
+            }
+		}
+	}
 }
+/*
+model {
+    tasks.generatePomFileForMavenJavaPublication {
+        destination = file("$buildDir/pom/generated-pom.xml")
+    }
+}*/
 
 bintray {
 	user = getPropertyOrWarn('bintray.user')
@@ -101,4 +138,8 @@ String getPropertyOrWarn(String propertyName) {
 		return 'missing'
 	}
 	return project.getProperty(propertyName)
+}
+
+boolean canSign() {
+    return project.hasProperty('signing.keyid')
 }
