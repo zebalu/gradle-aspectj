@@ -5,10 +5,11 @@ Usage
 -----
 
 Either build this project yourself, and include the `.jar` in your buildscript dependencies,
-or use our Maven repo. The plugin is applied using `apply plugin: 'aspectj'`. 
+or use our Maven repo. (It is also availbale in jcenter and in Maven Central.) 
+The plugin is applied using `apply plugin: 'aspectj'`. 
 The version of AspectJ to use can be defined using either `ext.aspectjVersion`, 
 or the `aspectj` extension's `version` attribute. 
-If the AspectJ version is not set, version `1.8.12` is used as the default.
+If the AspectJ version is not set, version `1.9.3` is used as the default.
 
 Something like this:
 
@@ -19,7 +20,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "net.uberfoo.gradle:gradle-aspectj:2.2"
+        classpath "io.githib.zebalu:gradle-aspectj:2.3.4"
     }
 }
 
@@ -31,15 +32,15 @@ apply plugin: 'aspectj'
 
 // Optionally
 project.ext {
-    aspectjVersion = '1.9.0'
+    aspectjVersion = '1.9.3'
 }
 // Or
 aspectj {
-    version = '1.9.0'
+    version = '1.9.3'
 }
 ```
 
-Note that version 2.0+ is only compatible with Gradle 4+. Use version 1.6 for earlier Gradle versions.
+Note that version 2.0+ is only compatible with Gradle 4+. Use version 1.6 for earlier Gradle versions. Only version `2.3.+` is Gradle 5.X comaptible.
 
 Use the `aspectpath`, `ajInpath`, `testAspectpath` and `testAjInpath` to specify external aspects or external code to weave:
 
