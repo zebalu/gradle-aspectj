@@ -5,7 +5,8 @@ Compatibility
 -------------
 
 ```version 2.* --> gradle 5.*
-version 3.* --> gradle 6.*```
+version 3.* --> gradle 6.*
+```
 
 Usage
 -----
