@@ -22,10 +22,10 @@ repositories {
 }
 
 dependencies {
-    compile localGroovy()
-    compile gradleApi()
-    testCompile gradleTestKit()
-    testCompile 'junit:junit:4.12'
+    implementation localGroovy()
+    implementation gradleApi()
+    testImplementation gradleTestKit()
+    testImplementation 'junit:junit:4.12'
 }
 
 if (canSign()) {

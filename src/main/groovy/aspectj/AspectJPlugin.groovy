@@ -1,9 +1,6 @@
 package aspectj
 
-import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
-import org.gradle.api.Plugin
-import org.gradle.api.Project
+import org.gradle.api.*
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.plugins.JavaPlugin
@@ -12,11 +9,13 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskAction
 
+import groovyjarjarpicocli.CommandLine.OverwrittenOptionException
+
 /**
  * Very simple Aspectj compiler for gradle.
  * @author Luke Taylor
  * @author Mike Noordermeer
- * @author Balázs Zaicsek
+ * @author Balï¿½zs Zaicsek
  */
 class AspectJPlugin implements Plugin<Project> {
 
@@ -58,14 +57,21 @@ class AspectJPlugin implements Plugin<Project> {
 			if (!projectSourceSet.allJava.isEmpty()) {
 				def aspectTaskName = namingConventions.getAspectCompileTaskName(projectSourceSet)
 				def javaTaskName = namingConventions.getJavaCompileTaskName(projectSourceSet)
-
-				project.tasks.create(name: aspectTaskName, overwrite: true, description: "Compiles AspectJ Source for ${projectSourceSet.name} source set", type: Ajc) {
-					sourceSet = projectSourceSet.name
-					inputs.files(projectSourceSet.allJava)
-					outputs.dir(projectSourceSet.java.outputDir)
-					aspectpath = project.configurations.findByName(namingConventions.getAspectPathConfigurationName(projectSourceSet))
-					ajInpath = project.configurations.findByName(namingConventions.getAspectInpathConfigurationName(projectSourceSet))
-				}
+                
+                def description = "Compiles AspectJ Source for ${projectSourceSet.name} source set"
+                def taskAction = {
+                    sourceSet = projectSourceSet.name
+                    inputs.files(projectSourceSet.allJava)
+                    outputs.dir(projectSourceSet.java.outputDir)
+                    aspectpath = project.configurations.findByName(namingConventions.getAspectPathConfigurationName(projectSourceSet))
+                    ajInpath = project.configurations.findByName(namingConventions.getAspectInpathConfigurationName(projectSourceSet))
+                }
+                
+                if(hasTaskWithName(project, aspectTaskName)) {
+                    project.tasks.create([name: aspectTaskName, overwrite: true, description: description, type: Ajc], taskAction)
+                } else {
+                    project.tasks.create([name: aspectTaskName, description: description, type: Ajc], taskAction)
+                }
 
 				project.tasks[aspectTaskName].setDependsOn(project.tasks[javaTaskName].dependsOn)
 				project.tasks[aspectTaskName].dependsOn(project.tasks[aspectTaskName].aspectpath)
@@ -76,6 +82,10 @@ class AspectJPlugin implements Plugin<Project> {
 			}
 		}
 	}
+    
+    private boolean hasTaskWithName(Project project, String name) {
+        return !(project.tasks.matching { it.name == name }.isEmpty())
+    }
 
 	private static class MainNamingConventions implements NamingConventions {
 
